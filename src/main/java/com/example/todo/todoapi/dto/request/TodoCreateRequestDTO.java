@@ -6,11 +6,11 @@ import lombok.*;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Size;
 
-@Setter @Getter
+@Getter @Setter
 @ToString @EqualsAndHashCode
 @AllArgsConstructor @NoArgsConstructor
 @Builder
-public class todoCreateRequestDTO {
+public class TodoCreateRequestDTO {
 
     @NotBlank
     @Size(min = 2, max = 10)
