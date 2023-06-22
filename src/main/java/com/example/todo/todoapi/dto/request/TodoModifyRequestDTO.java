@@ -4,17 +4,14 @@ import lombok.*;
 
 import javax.validation.constraints.NotBlank;
 
-@Getter @Setter
+@Setter @Getter
 @ToString @EqualsAndHashCode
-@AllArgsConstructor @NoArgsConstructor
+@NoArgsConstructor @AllArgsConstructor
 @Builder
 public class TodoModifyRequestDTO {
 
     @NotBlank
     private String id;
     private boolean done;
-
-
-
 
 }

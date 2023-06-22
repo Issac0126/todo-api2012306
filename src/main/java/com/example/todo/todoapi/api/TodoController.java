@@ -8,11 +8,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
-import org.springframework.validation.FieldError;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-import javax.servlet.http.HttpServletRequest;
 
 @RestController
 @Slf4j
@@ -79,8 +77,9 @@ public class TodoController {
 
     //할 일 수정(체크) 요청  //수정 현재 작동안됨! 수정 필요.
     @RequestMapping(method = {RequestMethod.PUT, RequestMethod.PATCH})
-    public ResponseEntity<?> updateTodo(TodoModifyRequestDTO dto, BindingResult result){
+    public ResponseEntity<?> updateTodo(@Validated @RequestBody TodoModifyRequestDTO dto, BindingResult result){
         log.info("수정 요청 들어옴! /api/todos/ PUT or PATCH request");
+        log.info("들어온 dto: "+dto);
 
         if(result.hasErrors()){
             return ResponseEntity.badRequest().body("잘못된 ID입니다."+result.getFieldError());

@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -64,15 +65,32 @@ public class TodoService {
     }
 
     // done 수정하기 (할 일 체크)
+//    public TodoListResponseDTO modify(TodoModifyRequestDTO dto)
+//            throws RuntimeException {
+//        log.info("service 진입"+dto);
+//        Todo updateTodo = todoRepository.findById(dto.getId())
+//                .orElseThrow( () -> new RuntimeException(dto.getId() + "번 게시물이 존재하지 않습니다."));
+//        updateTodo.setDone(dto.isDone());
+//        log.info("service에서 setDone 완료");
+//        todoRepository.save(updateTodo);
+//
+//        return retrieve();
+//    }
+
     public TodoListResponseDTO modify(TodoModifyRequestDTO dto)
             throws RuntimeException {
         log.info("service 진입"+dto);
-        Todo updateTodo = todoRepository.findById(dto.getId())
-                .orElseThrow( () -> new RuntimeException(dto.getId() + "번 게시물이 존재하지 않습니다."));
-        updateTodo.setDone(dto.isDone());
-        todoRepository.save(updateTodo);
+        Optional<Todo> targetEntity
+                = todoRepository.findById(dto.getId());
 
+        targetEntity.ifPresent(entity -> {
+            entity.setDone(dto.isDone());
+
+            todoRepository.save(entity);
+            log.info("service에서 setDone 완료");
+        });
         return retrieve();
-
     }
+
+
 }
