@@ -1,12 +1,18 @@
 package com.example.todo.userapi.api;
 
+import com.example.todo.exception.DuplicatedEmailException;
+import com.example.todo.exception.NoRegisteredArgumentsException;
+import com.example.todo.userapi.dto.request.LoginRequestDTO;
+import com.example.todo.userapi.dto.request.UserRequestSignUpDTO;
+import com.example.todo.userapi.dto.request.UserSignUpResponseDTO;
+import com.example.todo.userapi.dto.response.LoginResponseDTO;
 import com.example.todo.userapi.service.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @Slf4j
@@ -20,9 +26,9 @@ public class UserController {
     // GET: /api/auth/check?email=zzzz@xxx.com
     @GetMapping("/check")
     public ResponseEntity<?> check(String email){
-
+        log.info("email 컨트롤러에 도착: "+email);
         if(email.trim().equals("")){
-            return ResponseEntity.badRequest().body("이메일을 작성하지 않았습니다!");
+            return ResponseEntity.badRequest().body("이메일이 없습니다!");
         }
 
         boolean resultFlag = userService.isDuplicate(email);
@@ -33,9 +39,47 @@ public class UserController {
 
 
     //회원 가입 요청 처리
+    //POST : /api/auth
+    @PostMapping
+    public ResponseEntity<?> signup(
+       @Validated @RequestBody UserRequestSignUpDTO dto,
+       BindingResult result){
+        
+        log.info("/api/auth POST - {}", dto);
+        
+        if(result.hasErrors()){
+            log.warn(result.toString());
+            return ResponseEntity.badRequest().body(result.getFieldError());
+        }
+        
+        try {
+            UserSignUpResponseDTO responseDTO = userService.create(dto);
+            return ResponseEntity.ok().body(responseDTO);
+        } catch (NoRegisteredArgumentsException e) {
+            log.warn("필수 가입정보를 전달받지못했습니다.");
+            return ResponseEntity.badRequest().body(e.getMessage());
+        } catch (DuplicatedEmailException e) {
+            log.warn("이메일이 중복되었습니다.");
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+        
+    }
 
-
-
+    
+    // 로그인 요청 처리
+    @PostMapping("/signin")
+    public ResponseEntity<?> signIn(@RequestBody @Validated LoginRequestDTO dto){
+        
+        try {
+            LoginResponseDTO responseDTO = userService.authenticate(dto);
+            return ResponseEntity.ok().body(responseDTO);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+    
+    
 
 
 

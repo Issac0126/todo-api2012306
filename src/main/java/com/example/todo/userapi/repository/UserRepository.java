@@ -14,9 +14,10 @@ public interface UserRepository
 
     //이메일로 회원정보 조회
     Optional<User> findByEmail(String email);
-
+    
     //이메일 중복 체크
-//    @Query("SELECT COUNT(*) FROM USER u WHERE u.email = ?1")
+//    @Query("SELECT COUNT(*) FROM User u WHERE u.email = ?1")
     boolean existsByEmail(String email);
+
 
 }
