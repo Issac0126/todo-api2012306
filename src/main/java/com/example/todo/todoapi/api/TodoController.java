@@ -1,5 +1,6 @@
 package com.example.todo.todoapi.api;
 
+import com.example.todo.auth.TokenUserInfo;
 import com.example.todo.todoapi.dto.request.TodoModifyRequestDTO;
 import com.example.todo.todoapi.dto.request.TodoCreateRequestDTO;
 import com.example.todo.todoapi.dto.response.TodoListResponseDTO;
@@ -7,6 +8,7 @@ import com.example.todo.todoapi.service.TodoService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -24,7 +26,8 @@ public class TodoController {
     //할 일 등록 요청
     @PostMapping
     public ResponseEntity<?> createTodo(
-            @Validated @RequestBody TodoCreateRequestDTO dto
+            @AuthenticationPrincipal TokenUserInfo userInfo
+            , @Validated @RequestBody TodoCreateRequestDTO dto
             , BindingResult result){
         log.info("등록 요청 들어옴! /api/todos/ POST request");
 
@@ -35,7 +38,7 @@ public class TodoController {
         }
 
         try {
-            TodoListResponseDTO responseDTO = todoService.insert(dto);
+            TodoListResponseDTO responseDTO = todoService.insert(dto, userInfo.getUserId());
             return ResponseEntity.ok().body(responseDTO);
         } catch (Exception e) {
             return ResponseEntity.internalServerError().body("할 일 등록 실패함. 원인: "+e.getMessage());
@@ -45,7 +48,9 @@ public class TodoController {
 
     //할 일 삭제 요청
     @DeleteMapping("/{id}")
-    public ResponseEntity<?> deleteTodo(@PathVariable("id") String todoId){
+    public ResponseEntity<?> deleteTodo(
+                    @AuthenticationPrincipal TokenUserInfo userInfo,
+                    @PathVariable("id") String todoId){
         log.info("삭제 요청 들어옴! /api/todos/{id} DELETE request", todoId);
 
         if(todoId == null || todoId.trim().equals("")){ //null이거나 비어있거나
@@ -54,7 +59,7 @@ public class TodoController {
         }
 
         try {
-            TodoListResponseDTO responseDTO = todoService.delete(todoId);
+            TodoListResponseDTO responseDTO = todoService.delete(todoId, userInfo.getUserId());
             return ResponseEntity.ok().body(responseDTO);
         } catch (Exception e) {
             return ResponseEntity.internalServerError()
@@ -66,18 +71,24 @@ public class TodoController {
 
     //할 일 목록 요청
     @GetMapping
-    public ResponseEntity<?> retrieveTodoList(){
+    public ResponseEntity<?> retrieveTodoList(
+       // 토큰에 인증된 사용자 정보를 불러올 수 있다
+       @AuthenticationPrincipal TokenUserInfo userInfo
+       ){
         log.info("목록 요청 들어옴! /api/todos/ GET request");
 
         //가장 기본 기능이라 에러가 날 경우 프로그램 자체가 동작하지 않음. 때문에 try/catch문 작성은 생략.
-        TodoListResponseDTO responseDTO = todoService.retrieve();
+        TodoListResponseDTO responseDTO = todoService.retrieve(userInfo.getUserId());
         return ResponseEntity.ok().body(responseDTO);
 
     }
 
     //할 일 수정(체크) 요청  //수정 현재 작동안됨! 수정 필요.
     @RequestMapping(method = {RequestMethod.PUT, RequestMethod.PATCH})
-    public ResponseEntity<?> updateTodo(@Validated @RequestBody TodoModifyRequestDTO dto, BindingResult result){
+    public ResponseEntity<?> updateTodo(
+                            @AuthenticationPrincipal TokenUserInfo userInfo,
+                            @Validated @RequestBody TodoModifyRequestDTO dto,
+                            BindingResult result){
         log.info("수정 요청 들어옴! /api/todos/ PUT or PATCH request");
         log.info("들어온 dto: "+dto);
 
@@ -86,7 +97,7 @@ public class TodoController {
         }
 
         try {
-            TodoListResponseDTO responseDTO = todoService.modify(dto);
+            TodoListResponseDTO responseDTO = todoService.modify(dto, userInfo.getUserId());
             return ResponseEntity.ok().body(responseDTO);
         } catch (Exception e) {
             return ResponseEntity.internalServerError()

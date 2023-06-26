@@ -25,7 +25,8 @@ public class UserService {
     private final TokenProvider tokenProvider;
 
     //회원 가입 처리
-    public UserSignUpResponseDTO create(UserRequestSignUpDTO dto)
+    public UserSignUpResponseDTO create(
+       final UserRequestSignUpDTO dto)
         throws RuntimeException{
 
         String email = dto.getEmail();
