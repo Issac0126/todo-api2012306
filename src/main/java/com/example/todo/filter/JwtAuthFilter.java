@@ -47,7 +47,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
             
             //인가 정보 리스트
             List<SimpleGrantedAuthority> authorityList = new ArrayList<>();
-            authorityList.add(new SimpleGrantedAuthority(userInfo.getRole().toString()));
+            authorityList.add(new SimpleGrantedAuthority("ROLE_"+userInfo.getRole().toString()));
             
             //인증 완료 처리
             // -스프링 시큐리티에게 인증정보를 전달해서
@@ -80,7 +80,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
       //요청 헤더에서 토큰 가져오기
       // http request header
       // -- Content-type : application/json
-      // -- Authorization : Bearer asjkldjaslkd32$dsakfulds
+      // -- Authorization : Bearer asjkldjaslkd32$dsakfulds토큰정보
       String bearerToken = request.getHeader("Authorization");
       
       // 요청 헤더가 가져온 토큰은 순수 토큰 값이 아닌

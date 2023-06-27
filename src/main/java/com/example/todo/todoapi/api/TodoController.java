@@ -5,6 +5,7 @@ import com.example.todo.todoapi.dto.request.TodoModifyRequestDTO;
 import com.example.todo.todoapi.dto.request.TodoCreateRequestDTO;
 import com.example.todo.todoapi.dto.response.TodoListResponseDTO;
 import com.example.todo.todoapi.service.TodoService;
+import com.example.todo.userapi.service.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -38,8 +39,12 @@ public class TodoController {
         }
 
         try {
-            TodoListResponseDTO responseDTO = todoService.insert(dto, userInfo.getUserId());
+            TodoListResponseDTO responseDTO = todoService.insert(dto, userInfo);
             return ResponseEntity.ok().body(responseDTO);
+        } catch (IllegalStateException e){
+            //권한 때문에 발생한 예외 (권한 이상으로 게시글 작성)
+            log.warn(e.getMessage());
+            return ResponseEntity.status(401).body(e.getMessage());
         } catch (Exception e) {
             return ResponseEntity.internalServerError().body("할 일 등록 실패함. 원인: "+e.getMessage());
         }
@@ -104,5 +109,8 @@ public class TodoController {
                     .body(TodoListResponseDTO.builder().error(e.getMessage()));
         }
     }
+    
+    
+    
 
 }

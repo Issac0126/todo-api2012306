@@ -14,7 +14,7 @@ import javax.validation.constraints.Size;
 public class TodoCreateRequestDTO {
 
     @NotBlank
-    @Size(min = 2, max = 10)
+    @Size(min = 2, max = 16)
     private String title;
     
     public Todo toEntity(){

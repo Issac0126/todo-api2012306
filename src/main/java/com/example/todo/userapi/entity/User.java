@@ -40,4 +40,13 @@ public class User {
     @Builder.Default
     private Role role = Role.COMMON; //유저 권한
 
+    
+    
+    //등급 수정 메서드 setter의 역할을 해줌.
+    public void changeRole(Role role){
+        this.role = role;
+    }
+    
+    
+    
 }
