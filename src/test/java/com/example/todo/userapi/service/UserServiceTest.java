@@ -38,7 +38,7 @@ class UserServiceTest {
         //param1 : 어떤 에러가 발생할 시 에러 클래스를 적용
         //param2 : 에러가 발생하는 상황을 함수로 전달
         // 이 상황에서 이런 에러가 발생한다는 가정으로 작성. => 에러가 난다는 가정하에 작성함.
-        assertThrows(RuntimeException.class, () -> { userService.create(dto); } );
+        assertThrows(RuntimeException.class, () -> { userService.create(dto, ""); } );
 
     }
 

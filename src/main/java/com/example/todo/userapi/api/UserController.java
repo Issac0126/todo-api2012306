@@ -16,6 +16,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 @Slf4j
@@ -45,25 +46,41 @@ public class UserController {
     //POST : /api/auth
     @PostMapping
     public ResponseEntity<?> signup(
-       @Validated @RequestBody UserRequestSignUpDTO dto,
-       BindingResult result){
+       @Validated @RequestPart("user") UserRequestSignUpDTO dto,
+       @RequestPart(value = "profileImage", required = false) MultipartFile profileImg,
+       //이미지가 여러개면 List<MultipartFile>로 선언! // required는 필수의 라는 뜻. 값이 안올 수 있다면 false로 줘야함.
+       BindingResult result
+    ) {
         
         log.info("/api/auth POST - {}", dto);
+        log.info("들어온 이미지 - {}", profileImg);
         
         if(result.hasErrors()){
-            log.warn(result.toString());
+            log.warn("유저 컨트롤러 result.toString(): "+result.toString());
             return ResponseEntity.badRequest().body(result.getFieldError());
         }
         
         try {
-            UserSignUpResponseDTO responseDTO = userService.create(dto);
+            String uploadedFilePath = null;
+            if(profileImg != null){
+                log.info("attached file name: {}", profileImg.getOriginalFilename());
+                uploadedFilePath = userService.uploadProfileImage(profileImg);
+            }
+            
+            UserSignUpResponseDTO responseDTO = userService.create(dto, uploadedFilePath);
             return ResponseEntity.ok().body(responseDTO);
+        
         } catch (NoRegisteredArgumentsException e) {
             log.warn("필수 가입정보를 전달받지못했습니다.");
             return ResponseEntity.badRequest().body(e.getMessage());
         } catch (DuplicatedEmailException e) {
             log.warn("이메일이 중복되었습니다.");
             return ResponseEntity.badRequest().body(e.getMessage());
+        } catch (Exception e){
+            //파일 저장에서 문제 발생
+            log.warn("기타 예외가 발생하였습니다.");
+            e.printStackTrace();
+            return ResponseEntity.internalServerError().build();
         }
         
     }
