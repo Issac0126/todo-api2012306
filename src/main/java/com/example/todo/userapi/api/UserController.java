@@ -126,7 +126,8 @@ public class UserController {
         }
     }
     
-    // 프로필 사진 이미지 데이터를 클라이언트에게 응답 처리ㅣ
+    // 프로필 사진 이미지 데이터를 클라이언트에게 응답 처리
+    // -> S3로 대체한 이후 이 메서드는 사용하지 않음.
     @GetMapping("/load-profile")
     public ResponseEntity<?> loadFile(
        @AuthenticationPrincipal TokenUserInfo userInfo
@@ -164,6 +165,7 @@ public class UserController {
         }
     }
     
+    
     // 사용자가 올린 파일의 속성을 파악하는 메서드
     private MediaType findExtensionAndGetMediaType(String filePath) {
         
@@ -182,6 +184,27 @@ public class UserController {
                 return null;
         }
     }
+    
+    
+    //프로필 사진을 주는 메서드. (로그인과 함께 주는게 편함!)
+    @GetMapping("/load-s3")
+    public ResponseEntity<?> loadS3(
+       @AuthenticationPrincipal TokenUserInfo userInfo //인증된 토큰 받아오기!
+        ) {
+        
+        log.info("/api/auth/load-3 GET - user: {}", userInfo);
+        
+        try {
+            String profilePath = userService.findProfilePath(userInfo.getUserId()); //링크가 돌아옴!
+            return ResponseEntity.ok().body(profilePath);
+        } catch (Exception e){
+            e.printStackTrace();
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+        
+    }
+    
+    
     
     
 }
